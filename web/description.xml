@@ -6,9 +6,9 @@
 <device>
 <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
 <presentationURL>/renderpres.html</presentationURL>
-<friendlyName>SHMediaRender</friendlyName>
-<manufacturer>SmartHouse</manufacturer>
-<manufacturerURL>http://www.smarthouse.ua/</manufacturerURL>
+<friendlyName>MediaRender</friendlyName>
+<manufacturer>Home</manufacturer>
+<manufacturerURL>http://www.home.ua/</manufacturerURL>
 <modelDescription/>
 <modelName/>
 <modelURL>http://www.nas01.hopto.org.ua</modelURL>
@@ -57,5 +57,5 @@
 
 </serviceList>
 </device>
-<URLBase>http://106.125.39.208:49152/</URLBase>
+<URLBase>http://192.168.2.1:49152/</URLBase>
 </root>
