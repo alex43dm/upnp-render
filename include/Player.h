@@ -1,0 +1,33 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
+#include <string>
+
+using namespace std;
+
+class Player {
+    public:
+        void init(string);
+        string time2string(long ns = 0);
+        bool eqSet(string str);
+        string eqGet();
+        static int seekTime(string Unit, string Target);
+    public:
+        virtual bool Play();
+        virtual bool Stop();
+        virtual bool Pause(bool);
+        virtual bool Next();
+        virtual bool Previos();
+        virtual bool Seek(string, string);
+        virtual bool SetAVTransportUri(const string);
+        virtual bool SetNextAVTransportUri(const string);
+        virtual bool Mute(bool);
+        virtual string GetVol();
+        virtual bool SetVol(int val);
+        virtual string trackDuration();
+        virtual string curPostion();
+        virtual string curPostionCount();
+        virtual bool isPlaying();
+};
+
+#endif // PLAYER_H

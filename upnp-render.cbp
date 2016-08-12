@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="upnp-render" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/upnp-render" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/upnp-render" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++14" />
+			<Add option="-fexceptions" />
+			<Add option="-Iinclude" />
+		</Compiler>
+		<Linker>
+			<Add library="upnp" />
+			<Add library="ixml" />
+		</Linker>
+		<Unit filename="config.xml" />
+		<Unit filename="include/ConManager.h" />
+		<Unit filename="include/Config.h" />
+		<Unit filename="include/Device.h" />
+		<Unit filename="include/Log.h" />
+		<Unit filename="include/Player.h" />
+		<Unit filename="include/RControl.h" />
+		<Unit filename="include/Service.h" />
+		<Unit filename="include/Transport.h" />
+		<Unit filename="include/WebPage.h" />
+		<Unit filename="include/WebServer.h" />
+		<Unit filename="include/Xml.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="src/ConManager.cpp" />
+		<Unit filename="src/Config.cpp" />
+		<Unit filename="src/Device.cpp" />
+		<Unit filename="src/Log.cpp" />
+		<Unit filename="src/Player.cpp" />
+		<Unit filename="src/RControl.cpp" />
+		<Unit filename="src/Service.cpp" />
+		<Unit filename="src/Transport.cpp" />
+		<Unit filename="src/WebPage.cpp" />
+		<Unit filename="src/WebServer.cpp" />
+		<Unit filename="src/Xml.cpp" />
+		<Unit filename="web/description.xml" />
+		<Unit filename="web/upnp/128x128.png" />
+		<Unit filename="web/upnp/64x64.png" />
+		<Unit filename="web/upnp/renderconnmgrSCPD.xml" />
+		<Unit filename="web/upnp/rendercontrolSCPD.xml" />
+		<Unit filename="web/upnp/rendertransportSCPD.xml" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
