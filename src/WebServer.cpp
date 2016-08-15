@@ -24,14 +24,13 @@ WebServer::WebServer()
 {
     pages = new std::map<std::string, WebPage *>();
 
-    registerFile("/description.xml", "upnp_description.xml");
-    registerFile("/upnp/128x128.png", "upnp_128x128.png");
-    registerFile("/upnp/64x64.png", "upnp_64x64.png");
-    registerFile("/upnp/renderconnmgrSCPD.xml", "upnp_renderconnmgr_scpd.xml");
-    registerFile("/upnp/rendertransportSCPD.xml", "upnp_rendertransport_scpd.xml");
-    registerFile("/upnp/rendercontrolSCPD.xml", "upnp_rendercontrol_scpd.xml");
+    registerFile("/description.xml", "/description.xml");
+    registerFile("/upnp/128x128.png", "/upnp/128x128.png");
+    registerFile("/upnp/64x64.png", "/upnp/64x64.png");
+    registerFile("/upnp/renderconnmgrSCPD.xml", "/upnp/renderconnmgrSCPD.xml");
+    registerFile("/upnp/rendertransportSCPD.xml", "/upnp/rendertransportSCPD.xml");
+    registerFile("/upnp/rendercontrolSCPD.xml", "/upnp/rendercontrolSCPD.xml");
 }
-
 //---------------------------------------------------------------------------------------------------------------
 void WebServer::loadPages(const char *dirname)
 {
