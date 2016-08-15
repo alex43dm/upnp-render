@@ -40,7 +40,11 @@ main(int argc, char* argv[] )
     Config::Instance()->LoadConfig(fname);
 
     Device *dev = new Device();
-    dev->loop();
+    for(;;)
+    {
+        dev->loop();
+        sleep(1);
+    }
 
     return 0;
 }

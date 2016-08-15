@@ -165,7 +165,7 @@ static void initMaps() {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-Transport::Transport(Config *cfg, Player *pPlayer) : m_pPlayer(pPlayer) {
+Transport::Transport(Player *pPlayer) : m_pPlayer(pPlayer) {
     initMaps();
     ID = "urn:schemas-upnp-org:service:AVTransport";
     state = TRANSPORT_STOPPED;

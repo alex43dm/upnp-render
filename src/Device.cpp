@@ -15,21 +15,20 @@ Device::Device() :
     remoteControl(0),
     webSrv(0)
 {
-
+    Config *cfg = Config::Instance();
     player = new Player();
-
     webSrv = new WebServer();
-    WebPage *index = webSrv->getPage("description.xml");
+    WebPage *index = webSrv->getPage("/description.xml");
 
     if (index)
     {
-        port = Config::Instance()->getPort();
-        UDN = Config::Instance()->UDN;
-        expTimeOut = atoi(Config::Instance()->AdvertisementExpTimeOut.c_str());
-        conManager = new ConManager(Config::Instance()->mime);
+        port = cfg->getPort();
+        UDN = cfg->UDN;
+        expTimeOut = atoi(cfg->AdvertisementExpTimeOut.c_str());
+        conManager = new ConManager(cfg->mime);
         remoteControl = new RControl(player);
-        transport = new Transport(Config::Instance(), player);
-        UPnPError("UpnpInit", UpnpInit(Config::Instance()->ip.c_str(), port));
+        transport = new Transport(player);
+        UPnPError("UpnpInit", UpnpInit(cfg->ip.c_str(), port));
         UPnPError("UpnpEnableWebserver", UpnpEnableWebserver(true));
         UPnPError("UpnpSetVirtualDirCallbacks",
                   UpnpSetVirtualDirCallbacks(webSrv->callbacks()));

@@ -3,7 +3,6 @@
 
 #include "Service.h"
 #include "Player.h"
-#include "Config.h"
 
 enum transportState {
     TRANSPORT_STOPPED,
@@ -17,7 +16,7 @@ enum transportState {
 
 class Transport : public Service {
     public:
-        Transport(Config *, Player *);
+        Transport(Player *);
         virtual ~Transport();
         bool action(struct Upnp_Action_Request *_event);
 

@@ -169,8 +169,6 @@ bool WebServer::registerFile(const std::string &path, const std::string &vPath)
         strReplace(doc, rootElement, "URLBase", Config::Instance()->url());
 
         entry->content = ixmlDocumenttoString(doc);
-
-        std::cout<<"Content: "<<entry->content<<std::endl;
     }
 
 
@@ -183,17 +181,6 @@ bool WebServer::registerFile(const std::string &path, const std::string &vPath)
         delete entry;
     return false;
 }
-//---------------------------------------------------------------------------------------------------------------
-/*
-bool WebServer::registerFile(std::string path) {
-    WebPage *entry = new WebPage(path);
-    if (entry->content.length() > 0) {
-        pages->insert(std::pair<const char *, WebPage *>(entry->fName.c_str(), entry));
-        return true;
-    }
-    return false;
-}
-*/
 //---------------------------------------------------------------------------------------------------------------
 WebPage *WebServer::getPage(const char *filename)
 {
