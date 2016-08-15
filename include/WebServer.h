@@ -2,22 +2,17 @@
 #define WEBSERVER_H
 
 #include <string>
-#include <map>
 
 #include <upnp/upnp.h>
 
-#include "Config.h"
 #include "WebPage.h"
-
-using namespace std;
 
 class WebServer {
     public:
-
-        WebServer(Config *);
+        WebServer();
         virtual ~WebServer();
         bool registerPage(std::string path, std::string contents,  std::string contentType);
-        bool registerFile(std::string path,  std::string contentType);
+        bool registerFile(const std::string &path, const std::string &vPath);
 
         static int get_info(const char *filename, struct File_Info *info);
         static UpnpWebFileHandle open(const char *filename, enum UpnpOpenFileMode mode);
@@ -30,10 +25,12 @@ class WebServer {
 
     protected:
     private:
-        Config *cfg;
+        std::string path;
         bool registerFile(std::string path);
         void loadPages(const char *dirname);
-        bool strReplace(string *, string, string);
+        bool strReplace(IXML_Document *doc, IXML_Element* rootElement,
+                           std::string whatReplace,
+                           std::string toReplace);
 };
 
 #endif // WEBSERVER_H

@@ -6,4 +6,5 @@
     <UDN>uuid:Render-0000-0000-0000-000000000001</UDN>
     <AdvertisementExpTimeOut>100</AdvertisementExpTimeOut>
     <mime>mime.xml</mime>
+    <webServer>web</webServer>
 </root>

@@ -18,17 +18,21 @@ class WebPage {
         std::string content;
         ContentTypes contentType;
 
-        WebPage(std::string virtual_fname,  std::string _contents,  std::string content_type);
-        WebPage(std::string path,  std::string content_type);
-        WebPage(std::string path);
+        WebPage(const std::string &virtual_fname,
+                const std::string &_contents,
+                const std::string &content_type);
+        WebPage(std::string &path,
+                const std::string &content_type);
+        WebPage(const std::string &path,
+                const std::string &vPath);
         virtual ~WebPage();
 
         const char *getContentType();
 
     protected:
     private:
-        ContentTypes getContentType(std::string t);
-        void setContentType(std::string t);
+        ContentTypes getContentType(const std::string &t);
+        void setContentType(const std::string &t);
 };
 
 #endif // WEBPAGE_H

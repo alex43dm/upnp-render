@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
 #include <map>
 
 #include <string.h>
@@ -9,16 +7,14 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-
 #include "WebPage.h"
-//#include "stools.h"
-//#include"log-pc.h"
-//#include"tools.h"
+#include "Config.h"
 
 static std::map<ContentTypes, std::string> ContentTypesNames;
 
 loadResourceFn *g_loadResourceFn = 0;
 
+//------------------------------------------------------------------------------
 bool loadFile(std::string &dst, const std::string &path) {
 
     if (g_loadResourceFn)
@@ -40,8 +36,10 @@ bool loadFile(std::string &dst, const std::string &path) {
     return true;
 }
 
-//---------------------------------------------------------------------------------------------------------------
-WebPage::WebPage(std::string virtual_fname,  std::string _contents,     std::string content_type) {
+//------------------------------------------------------------------------------
+WebPage::WebPage(const std::string &virtual_fname,
+                 const std::string &_contents,
+                 const std::string &content_type) {
     if (!ContentTypesNames.size()) {
         ContentTypesNames[png] = "image/png";
         ContentTypesNames[xml] = "text/xml";
@@ -51,30 +49,34 @@ WebPage::WebPage(std::string virtual_fname,  std::string _contents,     std::str
     content = _contents;
     contentType = getContentType(content_type);
 }
-//---------------------------------------------------------------------------------------------------------------
-WebPage::WebPage(std::string path,  std::string content_type) {
-    std::string fpath("web");
+//------------------------------------------------------------------------------
+WebPage::WebPage(std::string &path,
+                 const std::string &content_type) {
+    std::string fpath(Config::Instance()->webServer);
     fpath += path.erase(0, 5);
     loadFile(content, fpath);
     fName = path;
     contentType = getContentType(content_type);
 }
-//---------------------------------------------------------------------------------------------------------------
-WebPage::WebPage(std::string path) {
+//------------------------------------------------------------------------------
+WebPage::WebPage(const std::string &path, const std::string &vpath) {
     setContentType(path);
-    loadFile(content, path);
-    fName = path;
+    std::string fpath(Config::Instance()->webServer);
+    fpath += path;
+    loadFile(content, fpath);
+    fName = vpath;
 }
-//---------------------------------------------------------------------------------------------------------------
-ContentTypes WebPage::getContentType(std::string t) {
-    for (std::map<ContentTypes, std::string>::iterator it = ContentTypesNames.begin(); it != ContentTypesNames.end(); ++it) {
+//------------------------------------------------------------------------------
+ContentTypes WebPage::getContentType(const std::string &t) {
+    for (std::map<ContentTypes, std::string>::iterator
+         it = ContentTypesNames.begin(); it != ContentTypesNames.end(); ++it) {
         if ((*it).second == t)
             return (*it).first;
     }
     return unknown;
 }
-//---------------------------------------------------------------------------------------------------------------
-void WebPage::setContentType(std::string t) {
+//------------------------------------------------------------------------------
+void WebPage::setContentType(const std::string &t) {
     if (t.find(".xml") != std::string::npos) {
         contentType = xml;
     }
@@ -82,10 +84,10 @@ void WebPage::setContentType(std::string t) {
         contentType = png;
     }
 }
-//---------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char *WebPage::getContentType() {
     return ContentTypesNames[contentType].c_str();
 }
-//---------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 WebPage::~WebPage() {
 }

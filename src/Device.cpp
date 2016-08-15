@@ -18,7 +18,7 @@ Device::Device() :
 
     player = new Player();
 
-    webSrv = new WebServer(Config::Instance());
+    webSrv = new WebServer();
     WebPage *index = webSrv->getPage("description.xml");
 
     if (index)

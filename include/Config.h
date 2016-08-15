@@ -16,12 +16,14 @@ class Config {
         std::string Name;
         std::string mime;
         std::string volume;
+        std::string webServer;
 
         static Config* Instance();
         bool LoadConfig(const std::string fName);
 
         bool CreateFile(std::string fName);
         unsigned short getPort();
+        std::string url(){return "http://"+ip+":"+port;}
 
 
         virtual ~Config();

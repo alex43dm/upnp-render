@@ -68,6 +68,7 @@ bool Config::Load()
         xmlGetChildElementValue( rootElement, "AdvertisementExpTimeOut");
     DocumentRoot = xmlGetChildElementValue( rootElement, "DocumentRoot");
     mimeFile = xmlGetChildElementValue( rootElement, "mime");
+    webServer = xmlGetChildElementValue( rootElement, "webServer");
 
     volume = "70";
 
@@ -242,6 +243,7 @@ bool Config::CreateFile(std::string fName)
                                           AdvertisementExpTimeOut, doc));
     ixmlNode_appendChild(&root->n, setVal("Name",  Name, doc));
     ixmlNode_appendChild(&root->n, setVal("mime",  mime, doc));
+
 //    ixmlNode_appendChild(&root->n, setVal("equalizer",  equalizer, doc));
 
     //IXML_Element *devroot = ixmlDocument_createElement(doc, "devroot");
@@ -301,8 +303,6 @@ bool Config::mimeLoad()
     ixmlNodeList_free( nodeList );
 
     //mime += "\n";
-
-    std::cout<<"Mime: "<<mime<<std::endl;
 
     return true;
 }
