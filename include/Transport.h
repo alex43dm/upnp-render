@@ -40,9 +40,9 @@ class Transport : public Service {
         transportState state;
         bool notify(void);
         bool notify(int count, ...);
-        string TrackMetaData;
+        std::string TrackMetaData;
         Player                     *m_pPlayer;
-        string                      uri;
+        std::string                      uri;
 };
 
 #endif // TRANSPORT_H

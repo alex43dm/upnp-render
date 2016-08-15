@@ -21,6 +21,8 @@ class Config {
         bool CreateFile(std::string fName);
         unsigned short getPort();
 
+        static std::string getMac(const std::string &ifaName);
+
         virtual ~Config();
     protected:
     private:

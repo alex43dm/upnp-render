@@ -29,10 +29,12 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-std=c++14" />
 			<Add option="-fexceptions" />
 			<Add option="-Iinclude" />
+			<Add directory="/usr/include" />
 		</Compiler>
 		<Linker>
 			<Add library="upnp" />

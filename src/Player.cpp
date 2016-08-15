@@ -7,79 +7,44 @@
 
 #include "Player.h"
 #include "Config.h"
-//#include "stools.h"
+#include "Log.h"
 
-#ifdef _FF_PLAYER_
-FFPlayer *player;
-#endif
-
-void Player::init(string xml) {
-    #ifdef _FF_PLAYER_
-    player = new FFPlayer();
-    #endif
+void Player::init(const std::string &xml) {
     eqSet(xml);
 }
 
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Play() {
-    clog << "Player::Play" << endl;
-
-    #ifdef _FF_PLAYER_
-    if (player) {
-        if (player->cmd == State::STOP) {
-            pthread_create(&thread, NULL, threadLoop, (void *)player);
-        }
-        else {
-            player->cmd = State::PLAY;
-        }
-    }
-    #endif
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Stop() {
-    clog << "Player::Stop" << endl;
-
-    #ifdef _FF_PLAYER_
-    if (player) {
-        player->cmd = State::STOP;
-
-        if (thread) {
-            pthread_join(thread, NULL);
-            thread = 0;
-        }
-    }
-    #endif
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Pause(bool onOff) {
-    clog << "Player::Pause: " << onOff << endl;
-
-    #ifdef _FF_PLAYER_
-    if (onOff)
-        player->cmd = State::PAUSE;
-    else
-        player->cmd = State::PLAY;
-    #endif
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Next() {
-    clog << "Player::Next" << endl;
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Previos() {
-    clog << "Player::Previos" << endl;
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
-int Player::seekTime(string Unit, string Target) {
+int Player::seekTime(const std::string &Unit, const std::string &Target) {
+    Log::debug("%s", __func__);
     int res = 0;
     if (Unit == "REL_TIME") {
-        istringstream ss(Target);
-        string token;
+        std::istringstream ss(Target);
+        std::string token;
         int pos = 0;
 
         while (getline(ss, token, ':')) {
@@ -103,87 +68,49 @@ int Player::seekTime(string Unit, string Target) {
     return res;
 }
 
-bool Player::Seek(string Unit, string Target) {
-    clog << "Player::Seek: Target:" << Target << " Unit: " << Unit << endl;
-
-    #ifdef _FF_PLAYER_
-    int res = seekTime(Unit, Target);
-    player->seekTo = res * 1000000LL;
-    player->cmd = State::SEEK;
-    #else
+bool Player::Seek(const std::string &Unit, const std::string &Target) {
+    Log::debug("%s, target: %s unit: %s", __func__, Target.c_str(), Unit.c_str());
     seekTime(Unit, Target);
-    #endif
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
-bool Player::SetAVTransportUri(const string _uri) {
-    clog << "Player::SetAVTransportUri: url: " << _uri << endl;
-    Stop();
-    #ifdef _FF_PLAYER_
-    return player->open(_uri);
-    #else
+bool Player::SetAVTransportUri(const std::string &_uri) {
+    Log::debug("%s url: ", __func__,_uri.c_str());
+   Stop();
     return false;
-    #endif
 }
 //---------------------------------------------------------------------------------------------------------------
-bool Player::SetNextAVTransportUri(std::string _uri) {
-    clog << "Player::SetNextAVTransportUri: " << _uri << endl;
-
-    #ifdef _FF_PLAYER_
-    if (player) {
-        //      player->nextUri = _uri;
-    }
-    #endif
+bool Player::SetNextAVTransportUri(const std::string &_uri) {
+    Log::debug("%s url: ", __func__,_uri.c_str());
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::Mute(bool val) {
-    clog << "Player::Mute: " << val << endl;
-
-    #ifdef _FF_PLAYER_
-    if (player) {
-        if (val)
-            player->setVol(0);
-        else
-            player->setVol(vol);
-    }
-    #endif
+    Log::debug("%s", __func__);
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
-string Player::GetVol() {
-    std::clog << "Player::GetVol" << std::endl;
+std::string Player::GetVol() {
+    Log::debug("%s", __func__);
     return std::string(0);
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::SetVol(int val) {
-    std::clog << "Player::SetVol: " << val << std::endl;
-
-    #ifdef _FF_PLAYER_
-    if (player) {
-        player->setVol(val);
-    }
-    #endif
+    Log::debug("%s", __func__);
     return true;
 }
 
-string Player::trackDuration() {
-    #ifdef _FF_PLAYER_
-    return time2string(player->duration / 1000000LL);
-    #else
+std::string Player::trackDuration() {
+    Log::debug("%s", __func__);
     return "";
-    #endif
 }
 
-string Player::curPostion() {
-    #ifdef _FF_PLAYER_
-    return time2string(player->position * player->time_base.num / player->time_base.den);
-    #else
+std::string Player::curPostion() {
+    Log::debug("%s", __func__);
     return "0";
-    #endif
 }
 //---------------------------------------------------------------------------------------------------------------
-string Player::time2string(long ns) {
+std::string Player::time2string(long ns) {
     char tmp[10];
     int hh, mm, ss;
     //init val
@@ -194,40 +121,26 @@ string Player::time2string(long ns) {
     mm   = (ns % 3600) / 60;
     ss   = (ns % 60);
     memset(tmp, 0, sizeof(tmp));
-    #ifdef _WIN32
-    _snprintf_s(tmp, sizeof(tmp), sizeof(tmp), "%d:%02d:%02d", hh, mm, ss);
-    #else
     snprintf(tmp, sizeof(tmp), "%d:%02d:%02d", hh, mm, ss);
-    #endif
-    return string(tmp);
+    return std::string(tmp);
 }
 //---------------------------------------------------------------------------------------------------------------
-string Player::curPostionCount() {
-    #ifdef _FF_PLAYER_
-    char tmp2[10];
-    snprintf(tmp2, sizeof(tmp2), "%ld", player->position);
-    return string(tmp2);
-    #else
+std::string Player::curPostionCount() {
+    Log::debug("%s", __func__);
     return "0";
-    #endif
 }
 //---------------------------------------------------------------------------------------------------------------
 bool Player::isPlaying() {
-    #ifdef _FF_PLAYER_
-    if (player->cmd == State::PLAY) {
-        //pthread_join(thread,NULL);
-        return true;
-    }
-    #endif
+    Log::debug("%s", __func__);
     return false;
 }
 //---------------------------------------------------------------------------------------------------------------
-bool Player::eqSet(string xml) {
+bool Player::eqSet(const std::string &xml) {
 
     IXML_Document *doc = ixmlParseBuffer(xml.c_str());
 
     if (!doc) {
-        clog << "does not found parse: " << xml << endl;
+        Log::err("does not found parse: %s", xml.c_str());
         return false;
     }
 
@@ -235,28 +148,21 @@ bool Player::eqSet(string xml) {
 
     if (lst) {
         for (size_t i = 0; i < ixmlNodeList_length(lst); i++) {
-            #ifdef _FF_PLAYER_
-            IXML_Node *n = ixmlNodeList_item(lst, i);
-            string freq = ixmlElement_getAttribute((IXML_Element *)n,  "freq");
-            IXML_Node *textNode = ixmlNode_getFirstChild(n);
-            double val =  strtod(ixmlNode_getNodeValue(textNode), NULL);
-            player->eq->gains[eqBands[freq]] = val;
-            #endif
             //          clog<<"count: "<< i << " freq: "<< freq <<" val: "<< player->eq->gains[i]<<endl;
         }
     }
     else {
-        clog << "does not found equalizer section: " << xml << endl;
+        Log::err("does not found equalizer section: %s",xml.c_str());
         return false;
     }
 
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
-string Player::eqGet() {
+std::string Player::eqGet() {
 
     //  char buf[1024];
-    string ret = "<equalizer>\n";
+    std::string ret = "<equalizer>\n";
     /*
         for( int i =0; i < EQLEN; i++)
         {

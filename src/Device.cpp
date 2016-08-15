@@ -263,8 +263,8 @@ bool Device::notify(std::queue<VarElement *> *Variables, string id) {
 
 
 bool Device::handleGetVarRequest(struct Upnp_State_Var_Request *event) {
-    Log::debug("Device::handleGetVarRequest: id: %s event->StateVarName: %s",
-                event->ServiceID, event->StateVarName);
+    Log::debug("%s: id: %s event->StateVarName: %s",
+                __func__,event->ServiceID, event->StateVarName);
     event->CurrentVal = NULL;
     if (strcmp(event->ServiceID, cm->ID.c_str()) == 0) {
     }

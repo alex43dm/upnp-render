@@ -169,37 +169,37 @@ Transport::Transport(Config *cfg, Player *pPlayer) : m_pPlayer(pPlayer) {
     initMaps();
     ID = "urn:schemas-upnp-org:service:AVTransport";
     state = TRANSPORT_STOPPED;
-    map<string, string>::iterator it = StateVariables->begin();
-    it = StateVariables->insert(it, pair<string, string>("TransportState", (*transportStateValues)[state]));
-    it = StateVariables->insert(it, pair<string, string>("TransportStatus", "OK"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentMediaCategory", "TRACK_AWARE"));
-    it = StateVariables->insert(it, pair<string, string>("PlaybackStorageMedium", "NETWORK,UNKNOWN"));
-    it = StateVariables->insert(it, pair<string, string>("RecordStorageMedium", "NONE"));
-    it = StateVariables->insert(it, pair<string, string>("PossiblePlaybackStorageMedia", "NETWORK,UNKNOWN"));
-    it = StateVariables->insert(it, pair<string, string>("PossibleRecordStorageMedia", "NONE"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentPlayMode", "NORMAL"));
-    it = StateVariables->insert(it, pair<string, string>("TransportPlaySpeed", "1"));
-    it = StateVariables->insert(it, pair<string, string>("RecordMediumWriteStatus", "NOT_WRITABLE"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentRecordQualityMode", "NOT_IMPLEMENTED"));
-    it = StateVariables->insert(it, pair<string, string>("PossibleRecordQualityModes", "NOT_IMPLEMENTED"));
-    it = StateVariables->insert(it, pair<string, string>("NumberOfTracks", "1"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentTrack", "0"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentTrackDuration", "0:00:00"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentMediaDuration", "0:00:00"));
-    it = StateVariables->insert(it, pair<string, string>("CurrentTrackMetaData", ""));
-    it = StateVariables->insert(it, pair<string, string>("CurrentTrackURI", ""));
-    it = StateVariables->insert(it, pair<string, string>("AVTransportURI", ""));
-    it = StateVariables->insert(it, pair<string, string>("AVTransportURIMetaData", ""));
-    it = StateVariables->insert(it, pair<string, string>("NextAVTransportURI", ""));
-    it = StateVariables->insert(it, pair<string, string>("NextAVTransportURIMetaData", ""));
-    it = StateVariables->insert(it, pair<string, string>("RelativeTimePosition", "0:00:00"));
-    it = StateVariables->insert(it, pair<string, string>("AbsoluteTimePosition", "0:00:00"));
-    it = StateVariables->insert(it, pair<string, string>("RelativeCounterPosition", "0"));
-    it = StateVariables->insert(it, pair<string, string>("AbsoluteCounterPosition", "0"));
-    it = StateVariables->insert(it, pair<string, string>("LastChange", Xml::escape("<Event xmlns\"urn:schemas-upnp-org:metadata-1-0/AVT/\"/>", 0)));
-    it = StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_SeekMode", "REL_TIME"));
-    it = StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_SeekTarget", "REL_TIME"));
-    StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_InstanceID", "0"));
+    std::map<std::string, std::string>::iterator it = StateVariables->begin();
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("TransportState", (*transportStateValues)[state]));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("TransportStatus", "OK"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentMediaCategory", "TRACK_AWARE"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("PlaybackStorageMedium", "NETWORK,UNKNOWN"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("RecordStorageMedium", "NONE"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("PossiblePlaybackStorageMedia", "NETWORK,UNKNOWN"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("PossibleRecordStorageMedia", "NONE"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentPlayMode", "NORMAL"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("TransportPlaySpeed", "1"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("RecordMediumWriteStatus", "NOT_WRITABLE"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentRecordQualityMode", "NOT_IMPLEMENTED"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("PossibleRecordQualityModes", "NOT_IMPLEMENTED"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("NumberOfTracks", "1"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentTrack", "0"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentTrackDuration", "0:00:00"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentMediaDuration", "0:00:00"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentTrackMetaData", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("CurrentTrackURI", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("AVTransportURI", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("AVTransportURIMetaData", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("NextAVTransportURI", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("NextAVTransportURIMetaData", ""));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("RelativeTimePosition", "0:00:00"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("AbsoluteTimePosition", "0:00:00"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("RelativeCounterPosition", "0"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("AbsoluteCounterPosition", "0"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("LastChange", Xml::escape("<Event xmlns\"urn:schemas-upnp-org:metadata-1-0/AVT/\"/>", 0)));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_SeekMode", "REL_TIME"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_SeekTarget", "REL_TIME"));
+    StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_InstanceID", "0"));
     pPlayer->init(cfg->equalizer);
 }
 //---------------------------------------------------------------------------------------------------------------
@@ -227,7 +227,7 @@ Transport::~Transport() {
     }*/
 //---------------------------------------------------------------------------------------------------------------
 bool Transport::action(struct Upnp_Action_Request *event) {
-    string sw = event->ActionName;
+    std::string sw = event->ActionName;
     //clog<<"event->ActionName: "<<event->ActionName<<endl;
 
     switch ((*transportCmdValues)[sw]) {

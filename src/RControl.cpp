@@ -138,14 +138,14 @@ RControl::RControl(Player *pPlayer) : m_pPlayer(pPlayer) {
     initMaps();
     ID = "urn:schemas-upnp-org:service:RenderingControl";
 
-    map<string, string>::iterator it = StateVariables->begin();
-    it = StateVariables->insert(it, pair<string, string>("LastChange", Xml::escape("<Event xmlns = \"urn:schemas-upnp-org:metadata-1-0/RCS/\"/>", 0)));
-    it = StateVariables->insert(it, pair<string, string>("PresetNameList", "SHRenderer"));
-    it = StateVariables->insert(it, pair<string, string>("Volume", m_pPlayer->GetVol()));
-    it = StateVariables->insert(it, pair<string, string>("Mute", "FALSE"));
-    it = StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_Channel", "Master"));
-    it = StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_InstanceID", "0"));
-    StateVariables->insert(it, pair<string, string>("A_ARG_TYPE_PresetName", "SHRenderer"));
+    std::map<std::string, std::string>::iterator it = StateVariables->begin();
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("LastChange", Xml::escape("<Event xmlns = \"urn:schemas-upnp-org:metadata-1-0/RCS/\"/>", 0)));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("PresetNameList", "SHRenderer"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("Volume", m_pPlayer->GetVol()));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("Mute", "FALSE"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_Channel", "Master"));
+    it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_InstanceID", "0"));
+    StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_PresetName", "SHRenderer"));
 
     mute = false;
 }
@@ -156,7 +156,7 @@ RControl::~RControl() {
     delete controlCmdValues;
 }
 //---------------------------------------------------------------------------------------------------------------
-bool RControl::notify(string varName, string varVal) {
+bool RControl::notify(const std::string &varName, const std::string &varVal) {
     char buf[4096];
 
     snprintf(buf, sizeof(buf),
@@ -212,7 +212,7 @@ bool RControl::SetVol(struct Upnp_Action_Request *event) {
     return true;
 }
 
-bool RControl::SetVol(std::string dvol) {
+bool RControl::SetVol(const std::string &dvol) {
     m_pPlayer->SetVol(atoi(dvol.c_str()));
     notify("Volume", m_pPlayer->GetVol());
     return true;

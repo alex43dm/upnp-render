@@ -3,30 +3,28 @@
 
 #include <string>
 
-using namespace std;
-
 class Player {
     public:
-        void init(string);
-        string time2string(long ns = 0);
-        bool eqSet(string str);
-        string eqGet();
-        static int seekTime(string Unit, string Target);
+        void init(const std::string &);
+        std::string time2string(long ns = 0);
+        bool eqSet(const std::string &str);
+        std::string eqGet();
+        static int seekTime(const std::string &Unit, const std::string &Target);
     public:
         virtual bool Play();
         virtual bool Stop();
         virtual bool Pause(bool);
         virtual bool Next();
         virtual bool Previos();
-        virtual bool Seek(string, string);
-        virtual bool SetAVTransportUri(const string);
-        virtual bool SetNextAVTransportUri(const string);
+        virtual bool Seek(const std::string &, const std::string &);
+        virtual bool SetAVTransportUri(const std::string &);
+        virtual bool SetNextAVTransportUri(const std::string &);
         virtual bool Mute(bool);
-        virtual string GetVol();
+        virtual std::string GetVol();
         virtual bool SetVol(int val);
-        virtual string trackDuration();
-        virtual string curPostion();
-        virtual string curPostionCount();
+        virtual std::string trackDuration();
+        virtual std::string curPostion();
+        virtual std::string curPostionCount();
         virtual bool isPlaying();
 };
 

@@ -1,18 +1,25 @@
-#include <iostream>
-#include <fstream>
-
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <upnp/ixml.h>
 #include <upnp/upnp.h>
+#include <string.h>
+
+#include <ifaddrs.h>
+#include <netpacket/packet.h>
+
+#include <iostream>
+#include <fstream>
+#include <cstring>
 
 #include "Config.h"
 
 #define UUID "uuid:Render-0000-0000-0000-00000000000"
 
 Config::Config(const std::string &title,
-                const unsigned char *pMacAddr) : m_bError(false) {
-    if (pMacAddr) {
+               const unsigned char *pMacAddr) : m_bError(false)
+{
+    if (pMacAddr)
+    {
         char *ptr = (char *)malloc(40);
         sprintf(ptr, "uuid:Render-%02X%02X%02X%02X%02X%02X",
                 pMacAddr[3], pMacAddr[2],
@@ -31,13 +38,54 @@ Config::Config(const std::string &title,
     port = std::to_string(UpnpGetServerPort());
 
 }
+
+std::string Config::getMac(const std::string &ifaName)
+{
+    struct ifaddrs *ifaddr=NULL;
+    struct ifaddrs *ifa = NULL;
+    char mac[13];
+
+    if (getifaddrs(&ifaddr) == -1)
+    {
+        perror("getifaddrs");
+        return nullptr;
+    }
+    else
+    {
+        for ( ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+        {
+            if ( (ifa->ifa_addr) && (ifa->ifa_addr->sa_family == AF_PACKET) )
+            {
+                struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
+                if(srtcmp((const char *)ifaName.c_str(), (const char *)ifa->ifa_name) != 0)
+                    continue;
+
+                //char *ptr = (char *)malloc(40);
+                sprintf(mac, "%02X%02X%02X%02X%02X%02X",
+                        s->sll_addr[3], s->sll_addr[2],
+                        s->sll_addr[0], s->sll_addr[1],
+                        s->sll_addr[5], s->sll_addr[4]);
+                /*
+                                  for (i=0; i <s->sll_halen; i++)
+                                  {
+                                      printf("%02x%c", (s->sll_addr[i]), (i+1!=s->sll_halen)?':':'\n');
+                                  }*/
+                break;
+            }
+        }
+        freeifaddrs(ifaddr);
+    }
+    return 0;
+}
 //---------------------------------------------------------------------------------------------------------------
-unsigned short Config::getPort() {
+unsigned short Config::getPort()
+{
     return atoi(port.c_str());
 }
 
 //---------------------------------------------------------------------------------------------------------------
-IXML_Node *Config::setVal(std::string name, std::string val, IXML_Document *doc) {
+IXML_Node *Config::setVal(std::string name, std::string val, IXML_Document *doc)
+{
     IXML_Element *el = ixmlDocument_createElement(doc, name.c_str());
     IXML_Element *v = ixmlDocument_createElement(doc, val.c_str());
     (&v->n)->nodeType = eTEXT_NODE;
@@ -46,7 +94,8 @@ IXML_Node *Config::setVal(std::string name, std::string val, IXML_Document *doc)
     return &el->n;
 }
 //---------------------------------------------------------------------------------------------------------------
-bool Config::CreateFile(std::string fName) {
+bool Config::CreateFile(std::string fName)
+{
     IXML_Document *doc;
     doc = ixmlDocument_createDocument();
 
@@ -69,7 +118,8 @@ bool Config::CreateFile(std::string fName) {
     return true;
 }
 //---------------------------------------------------------------------------------------------------------------
-Config::~Config() {
+Config::~Config()
+{
     //dtor
 }
 

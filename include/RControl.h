@@ -12,13 +12,13 @@ class RControl : public Service {
         virtual ~RControl();
         bool action(struct Upnp_Action_Request *event);
 
-        bool notify(string, string);
+        bool notify(const std::string &, const std::string &);
 
         bool SetMute(struct Upnp_Action_Request *event);
         bool GetMute();
         bool GetVol();
         bool SetVol(struct Upnp_Action_Request *event);
-        bool SetVol(std::string dvol);
+        bool SetVol(const std::string &dvol);
 
     protected:
         Player                         *m_pPlayer;
