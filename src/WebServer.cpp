@@ -89,19 +89,6 @@ WebServer::~WebServer()
     delete pages;
 }
 //------------------------------------------------------------------------------
-bool WebServer::registerPage(std::string path, std::string contents,
-                             std::string contentType)
-{
-    WebPage *entry = new WebPage(path, contents, contentType);
-
-    if (entry->content.length() > 0)
-    {
-        pages->insert(std::pair<const char *, WebPage *>(entry->fName.c_str(), entry));
-        return true;
-    }
-    return false;
-}
-//------------------------------------------------------------------------------
 bool WebServer::strReplace(IXML_Document *doc, IXML_Element* rootElement,
                            std::string whatReplace,
                            std::string toReplace)

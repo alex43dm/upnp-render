@@ -9,20 +9,12 @@ enum ContentTypes {
     unknown
 };
 
-typedef bool loadResourceFn(std::string &dst, const std::string &path);
-extern loadResourceFn *g_loadResourceFn;
-
 class WebPage {
     public:
         std::string fName;
         std::string content;
         ContentTypes contentType;
 
-        WebPage(const std::string &virtual_fname,
-                const std::string &_contents,
-                const std::string &content_type);
-        WebPage(std::string &path,
-                const std::string &content_type);
         WebPage(const std::string &path,
                 const std::string &vPath);
         virtual ~WebPage();
@@ -31,8 +23,8 @@ class WebPage {
 
     protected:
     private:
-        ContentTypes getContentType(const std::string &t);
         void setContentType(const std::string &t);
+        bool loadFile(std::string &dst, const std::string &path);
 };
 
 #endif // WEBPAGE_H
