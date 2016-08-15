@@ -5,7 +5,7 @@
 
 class Player {
     public:
-        void init(const std::string &);
+        void init();
         std::string time2string(long ns = 0);
         bool eqSet(const std::string &str);
         std::string eqGet();

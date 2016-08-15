@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="-f /home/alex/Projects/upnp-render/config.xml" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -41,6 +42,7 @@
 			<Add library="ixml" />
 		</Linker>
 		<Unit filename="config.xml" />
+		<Unit filename="equalizer.xml" />
 		<Unit filename="include/ConManager.h" />
 		<Unit filename="include/Config.h" />
 		<Unit filename="include/Device.h" />
@@ -53,6 +55,7 @@
 		<Unit filename="include/WebServer.h" />
 		<Unit filename="include/Xml.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="mime.xml" />
 		<Unit filename="src/ConManager.cpp" />
 		<Unit filename="src/Config.cpp" />
 		<Unit filename="src/Device.cpp" />

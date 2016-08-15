@@ -200,7 +200,7 @@ Transport::Transport(Config *cfg, Player *pPlayer) : m_pPlayer(pPlayer) {
     it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_SeekMode", "REL_TIME"));
     it = StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_SeekTarget", "REL_TIME"));
     StateVariables->insert(it, std::pair<std::string, std::string>("A_ARG_TYPE_InstanceID", "0"));
-    pPlayer->init(cfg->equalizer);
+    pPlayer->init();
 }
 //---------------------------------------------------------------------------------------------------------------
 Transport::~Transport() {

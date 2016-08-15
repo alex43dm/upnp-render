@@ -1,0 +1,18 @@
+<equalizer>
+	<gain freq=50>6.0</gain>
+	<gain freq=100>6.0</gain>
+	<gain freq=156>6.0</gain>
+	<gain freq=220>4.0</gain>
+	<gain freq=311>3.0</gain>
+	<gain freq=440>2.0</gain>
+	<gain freq=622>1.0</gain>
+	<gain freq=880>-2.0</gain>
+	<gain freq=1250>-2.0</gain>
+	<gain freq=1750>-3.0</gain>
+	<gain freq=2500>-5.0</gain>
+	<gain freq=3500>-2.0</gain>
+	<gain freq=5000>-1.0</gain>
+	<gain freq=10000>3.0</gain>
+	<gain freq=20000>4.0</gain>
+	<gain freq=25000>6.0</gain>
+</equalizer>

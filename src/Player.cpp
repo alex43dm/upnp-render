@@ -9,8 +9,8 @@
 #include "Config.h"
 #include "Log.h"
 
-void Player::init(const std::string &xml) {
-    eqSet(xml);
+void Player::init() {
+    //eqSet(xml);
 }
 
 //---------------------------------------------------------------------------------------------------------------

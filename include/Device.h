@@ -11,21 +11,20 @@
 
 //#include <pthread.h>
 
+#include "Player.h"
 #include "ConManager.h"
 #include "RControl.h"
 #include "Transport.h"
 
-using namespace std;
-
 class WebServer;
 
-class SubscribedClient {
+struct SubscribedClient {
     public:
-        string ServiceId;
-        string UDN;
-        string Sid;
+        std::string ServiceId;
+        std::string UDN;
+        std::string Sid;
 
-        SubscribedClient(string id, string udn, string sid) {
+        SubscribedClient(std::string id, std::string udn, std::string sid) {
             ServiceId = id;
             UDN = udn;
             Sid = sid;
@@ -37,9 +36,7 @@ class Device {
         unsigned short port;
         int expTimeOut;//seconds
 
-        Device(const string &title, Player *pPlayer,
-                const char *psIp = NULL,
-                const unsigned char *pMacAddr = NULL);
+        Device();
         virtual ~Device();
 
         bool handleActionRequest(struct Upnp_Action_Request *event);
@@ -50,7 +47,7 @@ class Device {
         bool loop();
 
         inline bool isInited() const {
-            return tr != 0;
+            return transport != 0;
         }
         void onStop();
         void onPlay();
@@ -60,20 +57,21 @@ class Device {
     protected:
 
     private:
-        Config *cfg ;
-        ConManager *cm;
-        Transport *tr;
-        RControl *rc;
-        WebServer *srv;
+        Player *player;
+        ConManager *conManager;
+        Transport *transport;
+        RControl *remoteControl;
+        WebServer *webSrv;
         //    CLock lock;
+
         std::string UDN;
-        list<SubscribedClient *> SubscribedClientList;
+        std::list<SubscribedClient *> SubscribedClientList;
 
         void UPnPError(std::string mes, int res);
         UpnpDevice_Handle deviceHandle;
 
         static int eventHandler(Upnp_EventType eventType, void *event, void *cookie);
-        bool notify(std::queue<VarElement *> *Variables, string id);
-        string getTime();
+        bool notify(std::queue<VarElement *> *Variables, std::string id);
+        std::string getTime();
 };
 #endif // _DEVICE_H_

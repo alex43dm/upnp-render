@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <root>
-<ip>106.125.39.208</ip>
-<port>49152</port>
-<DocumentRoot>web</DocumentRoot>
-<UDN>uuid:Render-0000-0000-0000-000000000001</UDN>
-<AdvertisementExpTimeOut>100</AdvertisementExpTimeOut>
+    <ifa>enp3s0</ifa>
+    <port>49152</port>
+    <DocumentRoot>web</DocumentRoot>
+    <UDN>uuid:Render-0000-0000-0000-000000000001</UDN>
+    <AdvertisementExpTimeOut>100</AdvertisementExpTimeOut>
+    <mime>mime.xml</mime>
 </root>

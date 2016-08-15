@@ -1,3 +1,7 @@
+#include <iostream>
+#include <fstream>
+#include <regex>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <upnp/ixml.h>
@@ -7,93 +11,225 @@
 #include <ifaddrs.h>
 #include <netpacket/packet.h>
 
-#include <iostream>
-#include <fstream>
-#include <cstring>
+#include <sys/utsname.h>
 
 #include "Config.h"
 
-#define UUID "uuid:Render-0000-0000-0000-00000000000"
+#define UUID "uuid:Render-0000-0000-0000-%s"
 
-Config::Config(const std::string &title,
-               const unsigned char *pMacAddr) : m_bError(false)
+Config* Config::mInstance = NULL;
+
+//------------------------------------------------------------------------------
+Config* Config::Instance()
 {
-    if (pMacAddr)
-    {
-        char *ptr = (char *)malloc(40);
-        sprintf(ptr, "uuid:Render-%02X%02X%02X%02X%02X%02X",
-                pMacAddr[3], pMacAddr[2],
-                pMacAddr[0], pMacAddr[1],
-                pMacAddr[5], pMacAddr[4]);
-        UDN = std::string(ptr);
-    }
-    else
-        UDN = UUID;
+    if (!mInstance)
+        mInstance = new Config();
 
-    AdvertisementExpTimeOut = "3600";
-    DocumentRoot = "./upnp-config";
-    Name = title;
+    return mInstance;
+}
+//------------------------------------------------------------------------------
+Config::Config()
+{
+    mIsInited = false;
+}
+//------------------------------------------------------------------------------
+Config::~Config()
+{
+    //dtor
+}
+//------------------------------------------------------------------------------
+bool Config::LoadConfig(const std::string fName)
+{
+    fileName = fName;
+    return Load();
+}
+//------------------------------------------------------------------------------
+bool Config::Load()
+{
+    IXML_Document *doc = ixmlLoadDocument(fileName.c_str());
+    if( !doc  )
+    {
+        std::cerr<<"does not found config file: "<<fileName<<std::endl;
+        return false;
+    }
+
+    IXML_NodeList* rootList = ixmlDocument_getElementsByTagName( doc, "root" );
+    if ( !rootList )
+    {
+        std::cerr<<"does not found root section in file: "<<fileName<<std::endl;
+    }
+
+    IXML_Element* rootElement = ( IXML_Element* )ixmlNodeList_item( rootList, 0);
+
+    ifa = xmlGetChildElementValue( rootElement, "ifa");
+    port = xmlGetChildElementValue( rootElement, "port");
+    UDN = xmlGetChildElementValue( rootElement, "UDN");
+    AdvertisementExpTimeOut =
+        xmlGetChildElementValue( rootElement, "AdvertisementExpTimeOut");
+    DocumentRoot = xmlGetChildElementValue( rootElement, "DocumentRoot");
+    mimeFile = xmlGetChildElementValue( rootElement, "mime");
+
     volume = "70";
-//    port = "49152";
-    port = std::to_string(UpnpGetServerPort());
 
+    setName();
+    getNet();
+    mimeLoad();
+
+    mIsInited = true;
+    return mIsInited;
 }
 
-std::string Config::getMac(const std::string &ifaName)
+//------------------------------------------------------------------------------
+std::string
+Config::xmlGetChildElementValue(IXML_Element* parent,
+                                const std::string &tagName )
 {
-    struct ifaddrs *ifaddr=NULL;
-    struct ifaddrs *ifa = NULL;
-    char mac[13];
+    if ( !parent ) return "";
+    if ( tagName.empty() ) return "";
 
-    if (getifaddrs(&ifaddr) == -1)
-    {
-        perror("getifaddrs");
-        return nullptr;
-    }
-    else
-    {
-        for ( ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
-        {
-            if ( (ifa->ifa_addr) && (ifa->ifa_addr->sa_family == AF_PACKET) )
-            {
-                struct sockaddr_ll *s = (struct sockaddr_ll*)ifa->ifa_addr;
-                if(srtcmp((const char *)ifaName.c_str(), (const char *)ifa->ifa_name) != 0)
-                    continue;
 
-                //char *ptr = (char *)malloc(40);
-                sprintf(mac, "%02X%02X%02X%02X%02X%02X",
-                        s->sll_addr[3], s->sll_addr[2],
-                        s->sll_addr[0], s->sll_addr[1],
-                        s->sll_addr[5], s->sll_addr[4]);
-                /*
-                                  for (i=0; i <s->sll_halen; i++)
-                                  {
-                                      printf("%02x%c", (s->sll_addr[i]), (i+1!=s->sll_halen)?':':'\n');
-                                  }*/
-                break;
-            }
-        }
-        freeifaddrs(ifaddr);
+    IXML_NodeList* nodeList =
+        ixmlElement_getElementsByTagName( parent, tagName.c_str());
+    if ( !nodeList ) return "";
+
+    IXML_Node* element = ixmlNodeList_item( nodeList, 0 );
+    ixmlNodeList_free( nodeList );
+    if ( !element ) return "";
+
+    IXML_Node* textNode = ixmlNode_getFirstChild( element );
+    if ( !textNode ) return "";
+    const char* ret = ixmlNode_getNodeValue( textNode );
+    if( ret )
+    {
+        return ret;
     }
-    return 0;
+
+    return "";
 }
-//---------------------------------------------------------------------------------------------------------------
-unsigned short Config::getPort()
+//------------------------------------------------------------------------------
+std::string
+Config::xmlGetChildElement(IXML_Element* parent, const char* tagName )
 {
-    return atoi(port.c_str());
-}
+    if ( !parent ) return "";
+    if ( !tagName ) return "";
 
-//---------------------------------------------------------------------------------------------------------------
-IXML_Node *Config::setVal(std::string name, std::string val, IXML_Document *doc)
+    char* s = strdup( tagName );
+    IXML_NodeList* nodeList = ixmlElement_getElementsByTagName( parent, s );
+    free( s );
+
+    IXML_Node* element = ixmlNodeList_item( nodeList, 0 );
+    ixmlNodeList_free( nodeList );
+    if ( !element ) return "";
+
+    const char* ret = ixmlNodetoString( element );
+    if( ret )
+    {
+        return ret;
+    }
+
+    return "";
+}
+///------------------------------------------------------------------------------
+std::string
+Config::xmlGetChildElementAttr(IXML_Element* parent,
+                               const char* tagName, const char* attrName )
+{
+    if ( !parent ) return "";
+    if ( !tagName ) return "";
+    if ( !attrName ) return "";
+
+    char* s = strdup( tagName );
+    IXML_NodeList* nodeList = ixmlElement_getElementsByTagName( parent, s );
+    free( s );
+
+    IXML_Node* element = ixmlNodeList_item( nodeList, 0 );
+    ixmlNodeList_free( nodeList );
+    if ( !element ) return "";
+
+    const char* ret =
+        ixmlElement_getAttribute((IXML_Element* )element,  attrName);
+    if( ret )
+    {
+        return ret;
+    }
+
+    return "";
+}
+//------------------------------------------------------------------------------
+IXML_Node* Config::setVal(std::string name, std::string val, IXML_Document* doc)
 {
     IXML_Element *el = ixmlDocument_createElement(doc, name.c_str());
     IXML_Element *v = ixmlDocument_createElement(doc, val.c_str());
     (&v->n)->nodeType = eTEXT_NODE;
-    ixmlNode_setNodeValue(&v->n, val.c_str());
-    ixmlNode_appendChild(&el->n, &v->n);
+    ixmlNode_setNodeValue(&v->n,val.c_str());
+    ixmlNode_appendChild( &el->n, &v->n );
     return &el->n;
 }
-//---------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+void Config::setName()
+{
+    struct utsname unameVal;
+
+    if(uname(&unameVal) == 0)
+    {
+        Name = unameVal.nodename;
+    }
+    else
+        Name = "Linux";
+}
+//------------------------------------------------------------------------------
+bool Config::getNet()
+{
+    struct ifaddrs *addrList=NULL;
+    struct ifaddrs *ifa = NULL;
+    struct sockaddr_in *sa;
+    char h[13];
+
+    std::regex e(Config::ifa);
+    memset(h,0,sizeof(h));
+
+    if (getifaddrs(&addrList) == -1)
+    {
+        perror("getifaddrs");
+        return false;
+    }
+    else
+    {
+        for (ifa = addrList; ifa != NULL; ifa = ifa->ifa_next)
+        {
+            if (!ifa->ifa_addr)
+                continue;
+
+            if (ifa->ifa_addr->sa_family == AF_PACKET
+                    && std::regex_match(ifa->ifa_name,e))
+            {
+                struct sockaddr_ll *m = (struct sockaddr_ll*)ifa->ifa_addr;
+
+                sprintf(h, "%02X%02X%02X%02X%02X%02X",
+                        m->sll_addr[3], m->sll_addr[1],
+                        m->sll_addr[2], m->sll_addr[4],
+                        m->sll_addr[5], m->sll_addr[0]);
+                mac = h;
+                continue;
+            }
+
+            if (ifa->ifa_addr->sa_family == AF_INET
+                    && std::regex_match(ifa->ifa_name,e))
+            {
+                sa = (struct sockaddr_in *) ifa->ifa_addr;
+                ip = inet_ntoa(sa->sin_addr);
+            }
+        }
+        freeifaddrs(addrList);
+    }
+    return true;
+}
+//------------------------------------------------------------------------------
+unsigned short Config::getPort()
+{
+    return atoi(port.c_str());
+}
+//------------------------------------------------------------------------------
 bool Config::CreateFile(std::string fName)
 {
     IXML_Document *doc;
@@ -102,10 +238,11 @@ bool Config::CreateFile(std::string fName)
     IXML_Element *root = ixmlDocument_createElement(doc, "root");
     ixmlNode_appendChild(&root->n, setVal("port",  port, doc));
     ixmlNode_appendChild(&root->n, setVal("UDN",  UDN, doc));
-    ixmlNode_appendChild(&root->n, setVal("AdvertisementExpTimeOut",  AdvertisementExpTimeOut, doc));
+    ixmlNode_appendChild(&root->n, setVal("AdvertisementExpTimeOut",
+                                          AdvertisementExpTimeOut, doc));
     ixmlNode_appendChild(&root->n, setVal("Name",  Name, doc));
     ixmlNode_appendChild(&root->n, setVal("mime",  mime, doc));
-    ixmlNode_appendChild(&root->n, setVal("equalizer",  equalizer, doc));
+//    ixmlNode_appendChild(&root->n, setVal("equalizer",  equalizer, doc));
 
     //IXML_Element *devroot = ixmlDocument_createElement(doc, "devroot");
 
@@ -117,101 +254,55 @@ bool Config::CreateFile(std::string fName)
     configFile.close();
     return true;
 }
-//---------------------------------------------------------------------------------------------------------------
-Config::~Config()
+//------------------------------------------------------------------------------
+bool Config::mimeLoad()
 {
-    //dtor
+    unsigned long i, length;
+
+    IXML_Document *doc = ixmlLoadDocument(mimeFile.c_str());
+    if( !doc  )
+    {
+        std::cerr<<"does not found config file: "<<mimeFile<<std::endl;
+        return false;
+    }
+
+    IXML_NodeList* rootList = ixmlDocument_getElementsByTagName( doc, "root" );
+    if ( !rootList )
+    {
+        std::cerr<<"does not found root section in file: "<<mimeFile<<std::endl;
+    }
+
+    IXML_Element* rootElement = ( IXML_Element* )ixmlNodeList_item( rootList, 0);
+
+    IXML_NodeList* nodeList =
+        ixmlElement_getElementsByTagName( rootElement, "url");
+    if ( !nodeList ) return false;
+    length = ixmlNodeList_length(nodeList);
+    for(i = 0; i < length; i++)
+    {
+        IXML_Node* element = ixmlNodeList_item( nodeList, i );
+        if ( !element ) continue;
+
+        IXML_Node* textNode = ixmlNode_getFirstChild( element );
+        if ( !textNode ) continue;
+        const char* ret = ixmlNode_getNodeValue( textNode );
+        if( ret )
+        {
+            mime += ret;
+            if (i < length-1)
+                mime += ",\n";
+            else
+                mime += "\n";
+
+            free((void*)ret);
+        }
+    }
+
+    ixmlNodeList_free( nodeList );
+
+    //mime += "\n";
+
+    std::cout<<"Mime: "<<mime<<std::endl;
+
+    return true;
 }
-
-const std::string Config::mime(
-    "http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_LRG;DLNA.ORG_OP=01;DLNA.ORG_FLAGS=00d00000000000000000000000000000,\n"
-    "http-get:*:image/png:DLNA.ORG_PN=PNG_LRG;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000,\n"
-    "http-get:*:image/gif:DLNA.ORG_PN=GIF_LRG;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000,\n"
-    "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:audio/mp4:DLNA.ORG_PN=AAC_ISO;DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMABASE;DLNA.ORG_OP=11;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/mp4:DLNA.ORG_PN=AVC_MP4_BL_CIF15_AAC_520;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_TS_SD_EU_ISO;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=8d700000000000000000000000000000,\n"
-    "http-get:*:video/avi:DLNA.ORG_PN=AVI;DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/3gpp:DLNA.ORG_PN=AMR_3GPP;DLNA.ORG_OP=11;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/quicktime:DLNA.ORG_PN=QUICKTIME;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVMED_BASE;DLNA.ORG_OP=11;DLNA.ORG_FLAGS=01700000000000000000000000000000,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_TS_SD_NA_ISO;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=8d700000000000000000000000000000,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_TS_SD_KO_ISO;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=8d700000000000000000000000000000,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_TS_SD_JP_ISO;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=8d700000000000000000000000000000,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVMED_PRO,\n"
-    "http-get:*:video/x-ms-asf:DLNA.ORG_PN=MPEG4_P2_ASF_SP_G726,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVMED_FULL,\n"
-    "http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_MED,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVMED_BASE,\n"
-    "http-get:*:audio/L16;rate=44100;channels=1:DLNA.ORG_PN=LPCM,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_NTSC,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVHIGH_PRO,\n"
-    "http-get:*:audio/L16;rate=44100;channels=2:DLNA.ORG_PN=LPCM,\n"
-    "http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_SM,\n"
-    "http-get:*:video/x-ms-asf:DLNA.ORG_PN=VC1_ASF_AP_L1_WMA,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMDRM_WMABASE,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVHIGH_FULL,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMAFULL,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMABASE,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVSPLL_BASE,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_NTSC_XAC3,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMDRM_WMVSPLL_BASE,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVSPML_BASE,\n"
-    "http-get:*:video/x-ms-asf:DLNA.ORG_PN=MPEG4_P2_ASF_ASP_L5_SO_G726,\n"
-    "http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_LRG,\n"
-    "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG_PS_PAL_XAC3,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMAPRO,\n"
-    "http-get:*:video/mpeg:DLNA.ORG_PN=MPEG1,\n"
-    "http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_TN,\n"
-    "http-get:*:video/x-ms-asf:DLNA.ORG_PN=MPEG4_P2_ASF_ASP_L4_SO_G726,\n"
-    "http-get:*:audio/L16;rate=48000;channels=2:DLNA.ORG_PN=LPCM,\n"
-    "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3X,\n"
-    "http-get:*:video/x-ms-wmv:DLNA.ORG_PN=WMVSPML_MP3,\n"
-    "http-get:*:video/x-ms-wmv:*,\n"
-    "http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/mpeg:DLNA.ORG_PN=MP2;DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-ms-wma:DLNA.ORG_PN=WMABASE;DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/mp4:DLNA.ORG_PN=AAC_ISO;DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-flac:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-aiff:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-ogg:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/wav:DLNA.ORG_PN=WAV;DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-ape:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-wavpack:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-musepack:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/L16;rate=44100;channels=1:DLNA.ORG_PN=LPCM;DLNA.ORG_OP=01;DLNA.ORG_CI=1,\n"
-    "http-get:*:audio/L16;rate=44100;channels=2:DLNA.ORG_PN=LPCM;DLNA.ORG_OP=01;DLNA.ORG_CI=1,\n"
-    "http-get:*:audio/L16;rate=48000;channels=1:DLNA.ORG_PN=LPCM;DLNA.ORG_OP=01;DLNA.ORG_CI=1,\n"
-    "http-get:*:audio/L16;rate=48000;channels=2:DLNA.ORG_PN=LPCM;DLNA.ORG_OP=01;DLNA.ORG_CI=1,\n"
-    "http-get:*:audio/L24:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/lpcm:DLNA.ORG_OP=01,\n"
-    "http-get:*:audio/x-mpegurl,\n"
-    "http-get:*:audio/x-mpeg-url,\n"
-    "http-get:*:audio/x-x-winamp-playlist,\n"
-    "http-get:*:audio/scpls,\n"
-    "http-get:*:audio/x-scpls"
-);
-
-const std::string Config::equalizer(
-    "	<equalizer>"
-    "		<gain freq=\"50\">6.0</gain>"
-    "		<gain freq=\"100\">6.0</gain>"
-    "		<gain freq=\"156\">6.0</gain>"
-    "		<gain freq=\"220\">4.0</gain>"
-    "		<gain freq=\"311\">3.0</gain>"
-    "		<gain freq=\"440\">2.0</gain>"
-    "		<gain freq=\"622\">1.0</gain>"
-    "		<gain freq=\"880\">-2.0</gain>"
-    "		<gain freq=\"1250\">-2.0</gain>"
-    "		<gain freq=\"1750\">-3.0</gain>"
-    "		<gain freq=\"2500\">-5.0</gain>"
-    "		<gain freq=\"3500\">-2.0</gain>"
-    "		<gain freq=\"5000\">-1.0</gain>"
-    "		<gain freq=\"10000\">3.0</gain>"
-    "		<gain freq=\"20000\">4.0</gain>"
-    "		<gain freq=\"25000\">6.0</gain>"
-    "	</equalizer>"
-);

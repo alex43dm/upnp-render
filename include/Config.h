@@ -7,27 +7,42 @@
 
 class Config {
     public:
+        std::string ifa;
+        std::string ip;
         std::string port;
         std::string DocumentRoot;
         std::string UDN;
         std::string AdvertisementExpTimeOut;
         std::string Name;
-        static const std::string mime;
-        static const std::string equalizer;
+        std::string mime;
         std::string volume;
-        bool m_bError;
 
-        Config(const std::string &title, const unsigned char *pMacAddr);
+        static Config* Instance();
+        bool LoadConfig(const std::string fName);
+
         bool CreateFile(std::string fName);
         unsigned short getPort();
 
-        static std::string getMac(const std::string &ifaName);
 
         virtual ~Config();
     protected:
+        bool Load();
     private:
+        bool mIsInited;
+        static Config* mInstance;
+        Config();
+
+        bool getNet();
+        void setName();
+        bool mimeLoad();
+        std::string xmlGetChildElementValue(IXML_Element* parent,
+                                const std::string &tagName );
+        std::string xmlGetChildElement(IXML_Element* parent, const char* tagName);
+        std::string xmlGetChildElementAttr(IXML_Element* parent,
+                               const char* tagName, const char* attrName);
         IXML_Node *setVal(std::string name, std::string val, IXML_Document *doc);
         std::string fileName;
+        std::string mac;
+        std::string mimeFile;
 };
-
 #endif // CONFIG_H
