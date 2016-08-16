@@ -5,7 +5,7 @@
 #include "Config.h"
 #include "Device.h"
 
-#define DEFAULT_CONFIG "confg.xml"
+#define DEFAULT_CONFIG "./config.xml"
 
 extern char *__progname;
 //------------------------------------------------------------------------------

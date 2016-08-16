@@ -51,7 +51,8 @@ Service::~Service() {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-std::string Service::upnpGetString(Upnp_Action_Request *event, std::string key) {
+std::string Service::upnpGetString(Upnp_Action_Request *event,
+                                   const std::string &key) {
     IXML_Node *node;
 
     node = (IXML_Node *) event->ActionRequest;

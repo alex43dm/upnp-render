@@ -11,7 +11,6 @@
 #include <upnp/upnp.h>
 
 #include "Xml.h"
-//#include "tools.h"
 
 class VarElement {
     public:
@@ -52,7 +51,8 @@ class Service {
         std::queue<VarElement *> *notifyResponse;
 
         virtual bool action(struct Upnp_Action_Request *event) = 0;
-        std::string upnpGetString(Upnp_Action_Request *event, std::string key);
+        std::string upnpGetString(Upnp_Action_Request *event,
+                                  const std::string &key);
 
         Service();
         static std::string toString(int enumVal);

@@ -40,6 +40,9 @@ Config::~Config()
 //------------------------------------------------------------------------------
 bool Config::LoadConfig(const std::string fName)
 {
+    if (!mInstance)
+        mInstance = new Config();
+
     fileName = fName;
     return Load();
 }

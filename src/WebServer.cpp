@@ -1,9 +1,7 @@
 #include <map>
-#include <iostream>
 
 #include <string.h>
 #include <sys/types.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,7 +17,8 @@ typedef struct
     const char *contents;
     size_t len;
 } WebServerFile;
-//---------------------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 WebServer::WebServer()
 {
     pages = new std::map<std::string, WebPage *>();
@@ -30,53 +29,6 @@ WebServer::WebServer()
     registerFile("/upnp/renderconnmgrSCPD.xml", "/upnp/renderconnmgrSCPD.xml");
     registerFile("/upnp/rendertransportSCPD.xml", "/upnp/rendertransportSCPD.xml");
     registerFile("/upnp/rendercontrolSCPD.xml", "/upnp/rendercontrolSCPD.xml");
-}
-//---------------------------------------------------------------------------------------------------------------
-void WebServer::loadPages(const char *dirname)
-{
-    DIR *dir;
-    struct dirent *entry;
-
-    dir = opendir(dirname);
-    if (!dir)
-    {
-        perror("diropen");
-        exit(1);
-    };
-
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (entry->d_type == DT_REG)
-        {
-            loadPages(entry->d_name);
-        }
-        //printf("%d - %s [%d] %d\n",entry->d_ino, entry->d_name, entry->d_type, entry->d_reclen);
-    };
-
-    closedir(dir);
-    /*
-        CFileIterator fit;
-        u8 bDir;
-            while (const char* psFileName = fit.getFirstFile(dirname, bDir))
-            {
-                if (*psFileName == '.')
-                    continue;
-
-                if(bDir)
-                {
-                    loadPages(psFileName);
-                    continue;
-                }
-
-                std::string url;
-                if( strcmp(dirname,"web") != 0)
-                {
-                    url = dirname;
-                    url += "/";
-                }
-                url  += psFileName;
-                registerFile(url, psFileName);
-            }*/
 }
 //------------------------------------------------------------------------------
 WebServer::~WebServer()
@@ -90,8 +42,8 @@ WebServer::~WebServer()
 }
 //------------------------------------------------------------------------------
 bool WebServer::strReplace(IXML_Document *doc, IXML_Element* rootElement,
-                           std::string whatReplace,
-                           std::string toReplace)
+                           const std::string &whatReplace,
+                           const std::string &toReplace)
 {
     int ret;
 
@@ -130,15 +82,17 @@ bool WebServer::strReplace(IXML_Document *doc, IXML_Element* rootElement,
 //------------------------------------------------------------------------------
 bool WebServer::registerFile(const std::string &path, const std::string &vPath)
 {
-    WebPage *entry = new WebPage(path, vPath);
+    WebPage *entry = new WebPage(path);
 
     if (path == "/description.xml")
     {
-        IXML_Document *doc = ixmlParseBuffer(entry->content.c_str());
-        if( !doc  )
+        IXML_Document *doc = 0;
+        int ret = ixmlParseBufferEx(entry->content.c_str(), &doc);
+        if( ret !=  IXML_SUCCESS )
         {
-            Log::err("%s: Error parse: %s", __func__, path.c_str());
-            return false;
+            Log::err("%s: Error parse: %s : %d", __func__, path.c_str(), ret);
+            printf("parse: %lu\n %s\n", entry->len, entry->content.c_str());
+            exit(1);
         }
 
         IXML_NodeList* rootList = ixmlDocument_getElementsByTagName(doc, "root");
@@ -155,22 +109,31 @@ bool WebServer::registerFile(const std::string &path, const std::string &vPath)
         strReplace(doc, rootElement, "URLBase", Config::Instance()->url());
 
         entry->content = ixmlDocumenttoString(doc);
+        entry->len = entry->content.size();
     }
 
 
-    if (entry->content.length() > 0)
+    if (entry->len > 0)
     {
         pages->insert(std::pair<std::string, WebPage *>(vPath, entry));
         return true;
     }
     else
-        delete entry;
+    {
+        Log::err("%s: error insert page: %s", path.c_str());
+        exit(1);
+    }
+
     return false;
 }
 //---------------------------------------------------------------------------------------------------------------
-WebPage *WebServer::getPage(const char *filename)
+WebPage *WebServer::getPage(const char *vPath)
 {
-    WebPage *p = (*pages)[filename];
+    WebPage *p = (*pages)[vPath];
+    if (!p)
+    {
+        Log::err("%s: path: %s not found",__func__,vPath);
+    }
     return p;
 }
 //---------------------------------------------------------------------------------------------------------------
@@ -179,7 +142,7 @@ int WebServer::get_info(const char *filename, struct File_Info *info)
     WebPage *entry = (*pages)[filename];
     if (entry)
     {
-        info->file_length = entry->content.length();
+        info->file_length = entry->len;
         info->last_modified = 0;
         info->is_directory = 0;
         info->is_readable = 1;
@@ -204,7 +167,7 @@ UpnpWebFileHandle WebServer::open(const char *filename, enum UpnpOpenFileMode mo
     {
         file = (WebServerFile *)malloc(sizeof(WebServerFile));
         file->pos = 0;
-        file->len = entry->content.length();
+        file->len = entry->len;
         file->contents = entry->content.c_str();
         return file;
     }

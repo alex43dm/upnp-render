@@ -7,14 +7,13 @@
 
 #include "WebPage.h"
 #include "Config.h"
+#include "Log.h"
 
 //------------------------------------------------------------------------------
-WebPage::WebPage(const std::string &path, const std::string &vpath) {
+WebPage::WebPage(const std::string &path) {
+    len = 0;
+    loadFile(content, Config::Instance()->webServer + path);
     setContentType(path);
-    std::string fpath(Config::Instance()->webServer);
-    fpath += path;
-    loadFile(content, fpath);
-    fName = vpath;
 }
 //------------------------------------------------------------------------------
 WebPage::~WebPage() {
@@ -23,15 +22,20 @@ WebPage::~WebPage() {
 bool WebPage::loadFile(std::string &dst, const std::string &path) {
     int fd = open(path.c_str(), O_RDONLY);
     if (!fd) {
+            Log::err("%s: error open file: %s", __func__, path.c_str());
         return false;
     }
 
     struct stat st;
     fstat(fd, &st);
 
-    char *buf = (char *)malloc(st.st_size);
-    read(fd, buf, st.st_size);
+    len = st.st_size;
+
+    char *buf = (char *)malloc(len);
+    read(fd, buf, len);
     dst = std::string(buf);
+
+    close(fd);
 
     return true;
 }

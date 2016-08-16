@@ -11,12 +11,11 @@ enum ContentTypes {
 
 class WebPage {
     public:
-        std::string fName;
         std::string content;
         ContentTypes contentType;
+        size_t len;
 
-        WebPage(const std::string &path,
-                const std::string &vPath);
+        WebPage(const std::string &path);
         virtual ~WebPage();
 
         const char *getContentType();
