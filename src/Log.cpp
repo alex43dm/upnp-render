@@ -22,6 +22,7 @@ void Log::debug(const char* fmt, ... )
 #else
 void Log::debug(const char* fmt, ... )
 {
+    (void)fmt;
     return;
 };
 #endif
