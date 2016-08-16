@@ -51,3 +51,5 @@ missing
 src/.deps
 src/.dirstamp
 stamp-h1
+.deps
+upnp-render

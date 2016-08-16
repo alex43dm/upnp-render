@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 
 bin_PROGRAMS = upnp-render
-upnp_render_SOURCES=src/ConManager.cpp src/Log.cpp src/RControl.cpp src/Xml.cpp src/Config.cpp src/Device.cpp src/Player.cpp src/Service.cpp src/Transport.cpp src/WebPage.cpp src/WebServer.cpp
+upnp_render_SOURCES=main.cpp src/ConManager.cpp src/Log.cpp src/RControl.cpp src/Xml.cpp src/Config.cpp src/Device.cpp src/Player.cpp src/Service.cpp src/Transport.cpp src/WebPage.cpp src/WebServer.cpp
 upnp_render_CPPFLAGS=-std=c++11 -Iinclude
 
 DEBDEP=bash (>= 2.05a-11), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), libupnp1.6.18 (>=1.6.18)
